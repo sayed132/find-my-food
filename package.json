@@ -1,0 +1,23 @@
+{
+  "name": "find-my-food",
+  "version": "1.0.0",
+  "description": "A platform to share excess food with those in need",
+  "scripts": {
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && nodemon src/server.js",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "keywords": [
+    "food",
+    "sharing",
+    "donation",
+    "community"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.3"
+  }
+} 
