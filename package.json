@@ -14,7 +14,7 @@
     "donation",
     "community"
   ],
-  "author": "",
+  "author": "Abu Sayed",
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^8.2.2",
