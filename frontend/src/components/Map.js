@@ -1,20 +1,29 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import { useEffect, useState } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvents,
+} from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
-// Fix Leaflet marker icon issue
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: '/marker-icon-2x.png',
-  iconUrl: '/marker-icon.png',
-  shadowUrl: '/marker-shadow.png',
+// Custom marker icon (from public folder)
+const customIcon = new L.Icon({
+  iconUrl: "/marker.png",
+  iconRetinaUrl: "/marker.png",
+  iconSize: [60, 60],
+  // iconAnchor: [22, 44],
+  // popupAnchor: [0, -32],
+  shadowUrl: "", // Optional: if you have a shadow image
 });
 
 function LocationMarker({ onLocationSelect }) {
   const [position, setPosition] = useState(null);
+  const [address, setAddress] = useState("");
 
   const map = useMapEvents({
     click: async (e) => {
@@ -24,10 +33,12 @@ function LocationMarker({ onLocationSelect }) {
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}`
         );
         const data = await response.json();
+        setAddress(data.display_name);
         onLocationSelect(e.latlng, data.display_name);
       } catch (error) {
-        console.error('Error getting address:', error);
-        onLocationSelect(e.latlng, 'Address not found');
+        console.error("Error getting address:", error);
+        setAddress("Address not found");
+        onLocationSelect(e.latlng, "Address not found");
       }
     },
   });
@@ -36,20 +47,27 @@ function LocationMarker({ onLocationSelect }) {
     map.locate();
   }, [map]);
 
-  return position === null ? null : <Marker position={position} />;
+  return position === null ? null : (
+    <Marker position={position} icon={customIcon}>
+      <Popup>{address || "Loading address..."}</Popup>
+    </Marker>
+  );
 }
 
 export default function Map({ onLocationSelect }) {
-  const [defaultPosition, setDefaultPosition] = useState([23.8103, 90.4125]); // Default to Dhaka
+  const [defaultPosition, setDefaultPosition] = useState([23.8103, 90.4125]); // Dhaka
 
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setDefaultPosition([position.coords.latitude, position.coords.longitude]);
+          setDefaultPosition([
+            position.coords.latitude,
+            position.coords.longitude,
+          ]);
         },
         (error) => {
-          console.error('Error getting location:', error);
+          console.error("Error getting location:", error);
         }
       );
     }
@@ -60,7 +78,7 @@ export default function Map({ onLocationSelect }) {
       center={defaultPosition}
       zoom={13}
       scrollWheelZoom={false}
-      style={{ height: '100%', width: '100%' }}
+      style={{ height: "100%", width: "100%" }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -69,4 +87,4 @@ export default function Map({ onLocationSelect }) {
       <LocationMarker onLocationSelect={onLocationSelect} />
     </MapContainer>
   );
-} 
+}
